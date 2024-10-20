@@ -4,30 +4,26 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/ezep/go-meli/payments/iternal/handler"
-	"github.com/ezep/go-meli/payments/iternal/repository"
-	"github.com/ezep/go-meli/payments/iternal/service"
+	"github.com/ezep02/payments/internal/handler"
+	"github.com/ezep02/payments/internal/repository"
+	"github.com/ezep02/payments/internal/service"
 	"github.com/go-chi/chi"
 	"github.com/spf13/viper"
 )
 
-// porque esta se encarga exlusivamente de los pagos con MP
 func main() {
-	// Configurar Viper
-	viper.SetConfigName(".env") // Nombre del archivo de configuración (sin extensión)
-	viper.SetConfigType("env")  // Tipo de archivo
-	viper.AddConfigPath(".")    // Ruta al directorio de la configuración
+
+	viper.SetConfigFile(".env")
 
 	// Intentar leer el archivo de configuración
 	if err := viper.ReadInConfig(); err != nil {
-		log.Printf("Error reading config file: %v", err)
+		log.Printf("[PAYMENT] Error reading config file: %v\n", err)
 	}
 
 	// Cargar variables de entorno
 	viper.AutomaticEnv()
 
-	// Definir valores predeterminados
-	viper.SetDefault("PAYMENT_SERVICE_PORT", "3000")
+	paymentPort := viper.GetString("PORT")
 
 	// Crear repositorio, servicio y handler
 	paymentRepository := repository.NewPaymentRepository()
@@ -38,13 +34,10 @@ func main() {
 	r := chi.NewRouter()
 	handler.PaymentRouter(r, paymentHandler)
 
-	// Obtener el puerto desde Viper
-	port := viper.GetString("PAYMENT_SERVICE_PORT")
+	log.Printf("Starting server on port http://localhost:%s...", paymentPort)
 
 	// Iniciar el servidor HTTP
-	log.Printf("Starting server on port http://localhost:%s...", port)
-
-	if err := http.ListenAndServe(":"+port, r); err != nil {
+	if err := http.ListenAndServe(":"+paymentPort, r); err != nil {
 		log.Fatalf("Could not start server: %s\n", err.Error())
 	}
 }

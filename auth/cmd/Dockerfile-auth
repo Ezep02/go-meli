@@ -1,0 +1,20 @@
+# Utiliza una imagen base de Go
+FROM golang:1.23
+
+# Establece el directorio de trabajo dentro del contenedor
+WORKDIR /app
+
+# Copia el go.mod y go.sum desde la carpeta raíz de auth
+COPY ../go.mod ../go.sum ./  
+RUN go mod download
+
+# Copia el resto del código fuente del servicio de autenticación
+COPY ../ . 
+# Compila el servicio de autenticación, ajustando la ruta al main.go
+RUN go build -o auth-service ./cmd/main.go  # Asegúrate de que apunte a `cmd/main.go`
+
+# Expone el puerto que utiliza tu servicio de autenticación
+EXPOSE 8081
+
+# Comando para ejecutar tu aplicación de autenticación
+CMD ["./auth-service"]

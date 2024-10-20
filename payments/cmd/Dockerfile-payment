@@ -1,0 +1,21 @@
+# Utiliza una imagen base de Go
+FROM golang:1.23
+
+# Establece el directorio de trabajo
+WORKDIR /app
+
+# Copia el go.mod y go.sum y descarga las dependencias
+COPY ../go.mod ../go.sum ./  
+RUN go mod download
+
+# Copia el resto del código fuente del servicio de autenticación
+COPY ../ .
+
+# Compila el servicio de autenticación
+RUN go build -o payment-service ./cmd/main.go   # Ajustar la ruta segun la estructura
+
+# Expone el puerto que utiliza tu servicio de autenticación
+EXPOSE 8081
+
+# Comando para ejecutar tu aplicación de autenticación
+CMD ["./payment-service"]
